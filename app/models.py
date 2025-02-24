@@ -9,7 +9,14 @@ class Timer(BaseModel):
     is_executed: bool = False
 
 class TimerRequest(BaseModel):
-    hours: int
-    minutes: int
-    seconds: int
+    '''
+    Pydantic model representing the request body for creating a timer.
+    Enforces validation rules:
+    - hours, minutes, seconds must be greater than or equal to 0
+    - hours, minutes, seconds must be integers
+    - webhook_url must be a valid URL
+    '''
+    hours: int = Field(ge=0)
+    minutes: int = Field(ge=0)
+    seconds: int = Field(ge=0)
     webhook_url: HttpUrl

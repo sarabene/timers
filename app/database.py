@@ -1,10 +1,10 @@
 import uuid
-# import aioredis as redis
 import redis
 import json
 from abc import ABC, abstractmethod
 from typing import Optional
 from app.models import Timer
+from app.config import Config
 
 class Database(ABC):
     @abstractmethod
@@ -22,8 +22,7 @@ class Database(ABC):
 
 class RedisDatabase(Database):
     def __init__(self):
-        #get redis connection details from env variables
-        self.client = redis.Redis(host="redis", port=6379, db=0)
+        self.client = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=0)
 
     def save_timer(self, timer: Timer) -> None:
         timer_id = str(timer.id)
