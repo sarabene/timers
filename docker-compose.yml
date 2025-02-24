@@ -1,0 +1,27 @@
+services:
+  web:
+    build: .
+    command: pipenv run uvicorn app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  rq_worker:
+    build: .
+    command: pipenv run rq worker -u redis://redis:6379/0 --with-scheduler
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+
+## Add an ngnix load balancer to scale like this 
+# docker-compose up --scale web=5

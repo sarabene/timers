@@ -1,0 +1,57 @@
+import uuid
+# import aioredis as redis
+import redis
+import json
+from abc import ABC, abstractmethod
+from typing import Optional
+from app.models import Timer
+
+class Database(ABC):
+    @abstractmethod
+    def save_timer(self, timer: Timer) -> None:
+        pass
+
+    @abstractmethod
+    def get_timer(self, timer_id: str) -> Optional[Timer]:
+        pass
+
+    @abstractmethod
+    def get_all_timers(self) -> Optional[Timer]:
+        pass
+
+
+class RedisDatabase(Database):
+    def __init__(self):
+        #get redis connection details from env variables
+        self.client = redis.Redis(host="redis", port=6379, db=0)
+
+    def save_timer(self, timer: Timer) -> None:
+        timer_id = str(timer.id)
+        timer_data = timer.model_dump_json()
+        
+        self.client.set(f"timer:{timer_id}", timer_data)
+
+    def get_timer(self, timer_id: str) -> Optional[Timer]:
+        timer_data = self.client.get(f"timer:{timer_id}")
+        if timer_data is None:
+            return None
+        return Timer(**json.loads(timer_data))
+    
+    def get_all_timers(self) -> list:
+        timers = []
+        cursor = 0
+
+        while True:
+            cursor, keys = self.client.scan(cursor, match="timer:*")
+            if keys:
+            # Fetch all timers' JSON data
+                values = self.client.mget(keys)
+                for value in values:
+                    if value:
+                    # Deserialize the JSON back into Timer objects
+                        timer_data = json.loads(value)
+                        timer = Timer(**timer_data)
+                        timers.append(timer)
+            if cursor == 0:
+                break
+        return timers
