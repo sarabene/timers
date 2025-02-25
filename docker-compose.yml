@@ -22,6 +22,3 @@ services:
       - .:/app
     depends_on:
       - redis
-
-## Add an ngnix load balancer to scale like this 
-# docker-compose up --scale web=5
