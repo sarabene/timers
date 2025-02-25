@@ -9,16 +9,16 @@ from app.jobs import TimerSerivce
 
 router = APIRouter()
 
+
 @router.post("/timer")
 def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_queue: Queue = Depends(get_redis_queue)):
     '''
     Endpoint to create and schedule a timer.
-
     Parameters:
-        "hours" (int): no. of hours to wait before triggering the webhook
-        "minutes" (int): no. of minutes to wait before triggering the webhook
-        "seconds" (int): no. of seconds to wait before triggering the webhook
-        "webhook_url" (url): the url the webhook should be sent to
+        - "hours" (int): no. of hours to wait before triggering the webhook
+        - "minutes" (int): no. of minutes to wait before triggering the webhook
+        - "seconds" (int): no. of seconds to wait before triggering the webhook
+        - "webhook_url" (url): the url the webhook should be sent to
     '''
     try:
         time_delta= timedelta(
@@ -34,7 +34,7 @@ def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_qu
         raise HTTPException(status_code=422, detail="Invalid time duration, try a shorter duration")
     
     # add timer to task queue
-    timer_service = TimerSerivce(db, redis_queue)
+    timer_service = TimerSerivce(redis_queue)
     timer_service.schedule_timer(timer)
 
     db.save_timer(timer)
@@ -53,7 +53,6 @@ def get_timer(timer_id: str, db: Database = Depends(get_db)):
     Parameters:
         timer_id (str): the id of the timer
     '''
-    # handle different uuid formats
 
     timer = db.get_timer(timer_id)
     if timer is None:

@@ -1,4 +1,3 @@
-import uuid
 import redis
 import json
 from abc import ABC, abstractmethod
@@ -13,10 +12,6 @@ class Database(ABC):
 
     @abstractmethod
     def get_timer(self, timer_id: str) -> Optional[Timer]:
-        pass
-
-    @abstractmethod
-    def get_all_timers(self) -> Optional[Timer]:
         pass
 
 
@@ -36,21 +31,3 @@ class RedisDatabase(Database):
             return None
         return Timer(**json.loads(timer_data))
     
-    def get_all_timers(self) -> list:
-        timers = []
-        cursor = 0
-
-        while True:
-            cursor, keys = self.client.scan(cursor, match="timer:*")
-            if keys:
-            # Fetch all timers' JSON data
-                values = self.client.mget(keys)
-                for value in values:
-                    if value:
-                    # Deserialize the JSON back into Timer objects
-                        timer_data = json.loads(value)
-                        timer = Timer(**timer_data)
-                        timers.append(timer)
-            if cursor == 0:
-                break
-        return timers
