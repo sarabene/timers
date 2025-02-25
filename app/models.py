@@ -1,11 +1,11 @@
 import uuid
+import datetime
 from pydantic import BaseModel, Field, HttpUrl
-from datetime import datetime
 
 class Timer(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     webhook_url: HttpUrl
-    timestamp: datetime
+    timestamp: datetime.datetime
 
 class TimerRequest(BaseModel):
     '''

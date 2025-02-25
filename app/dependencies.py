@@ -1,5 +1,5 @@
-from rq import Queue
 from app.database import RedisDatabase
+from app.queue import RedisQueue
 
 # Create an instance of the RedisDatabase
 redis_db = RedisDatabase()
@@ -10,5 +10,5 @@ def get_db():
 
 def get_redis_queue():
     db = get_db()
-    redis_queue = Queue(connection=db.client)
+    redis_queue = RedisQueue(redis_connection=db.client)
     return redis_queue

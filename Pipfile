@@ -10,6 +10,7 @@ redis = "*"
 
 [dev-packages]
 pytest = "*"
+fakeredis = "*"
 
 [requires]
 python_version = "3.10"

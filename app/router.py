@@ -1,17 +1,15 @@
-import uuid
+import datetime
 from fastapi import APIRouter, HTTPException, Depends
-from datetime import datetime, timedelta
-from rq import Queue
-from app.models import Timer, TimerRequest
-from app.database import Database
 from app.dependencies import get_db, get_redis_queue
+from app.database import Database
+from app.models import Timer, TimerRequest
 from app.jobs import TimerSerivce
+from app.queue import JobQueue
 
 router = APIRouter()
 
-
 @router.post("/timer")
-def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_queue: Queue = Depends(get_redis_queue)):
+def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_queue: JobQueue = Depends(get_redis_queue)):
     '''
     Endpoint to create and schedule a timer.
     Parameters:
@@ -21,14 +19,14 @@ def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_qu
         - "webhook_url" (url): the url the webhook should be sent to
     '''
     try:
-        time_delta= timedelta(
+        time_delta= datetime.timedelta(
             hours=request.hours,
             minutes=request.minutes,
             seconds=request.seconds
         )
         timer = Timer(
             webhook_url=request.webhook_url,
-            timestamp=datetime.now() + time_delta)
+            timestamp=datetime.datetime.now() + time_delta)
     
     except OverflowError:
         raise HTTPException(status_code=422, detail="Invalid time duration, try a shorter duration")
@@ -58,7 +56,7 @@ def get_timer(timer_id: str, db: Database = Depends(get_db)):
     if timer is None:
         raise HTTPException(status_code=404, detail="Timer not found")
 
-    time_left = (timer.timestamp - datetime.now()).total_seconds()
+    time_left = (timer.timestamp - datetime.datetime.now()).total_seconds()
     return {
         "id": timer.id,
         "time_left": max(0, time_left)
