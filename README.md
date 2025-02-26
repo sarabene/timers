@@ -44,3 +44,24 @@ Easiest way to do this is to use Swagger UI:
 * Navigate to http://localhost:8000/docs
 * Try out creating a timer and then querying it. 
 * After the specified time passes, you should see logs from redis-worker indicating that jobs have been executed.
+
+### Assumptions made
+
+* Didn't take timezones or clock changes into consideration. 
+
+* All valid incoming requests should contain non-negative hours, minutes and seconds.
+Something like this won't be processed to be executed: 
+
+```
+{
+  "hours": 1,
+  "minutes": -55,
+  "seconds": 1,
+  "webhook_url": "https://example.com"
+}
+```
+
+### Changes in a high-traffic environment
+
+* Currently, the timers are stored forever in Redis. They could be deleted after the webhooks have been trigged. 
+* Based on what functionality is needed, validation could be enforced to not allow scheduling timers too far in the future. 
