@@ -41,6 +41,12 @@ invalid_requests = {
         "minutes": 0,
         "seconds": 0,
         "webhook_url": "https://example.com/"
+    },
+    "empty json": {},
+    "incomplete json": {
+        "minutes": 1,
+        "seconds": 0,
+        "webhook_url": "https://example.com/"
     }
 }
 
@@ -95,6 +101,8 @@ class TestCreateTimerEndpoint():
         (invalid_requests["negative_numbers"]),
         (invalid_requests["not integers"]),
         (invalid_requests["too long duration"]),
+        (invalid_requests["empty json"]),
+        (invalid_requests["incomplete json"]),
     ])
     def test_request_sent_with_invalid_data(self, request_data):
         response = self.test_client.post("/timer", json=request_data)

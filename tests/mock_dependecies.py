@@ -1,5 +1,5 @@
 from app.database import Database
-from app.queue import JobQueue
+from app.job_queue import JobQueue
 from app.models import Timer
 
 class Mock_DB(Database):
@@ -17,6 +17,6 @@ class Mock_RQ(JobQueue):
     def __init__(self, jobs: list):
         self.jobs = jobs
 
-    def schedule_job_at(self, timestamp, *args):
-        job = (timestamp, *args)
+    def schedule_job_for_timer(self, timer: Timer):
+        job = (timer.timestamp, timer.id)
         self.jobs.append(job)

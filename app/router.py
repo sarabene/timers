@@ -3,20 +3,16 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.dependencies import get_db, get_redis_queue
 from app.database import Database
 from app.models import Timer, TimerRequest
-from app.jobs import TimerSerivce
-from app.queue import JobQueue
+from app.job_queue import JobQueue
 
 router = APIRouter()
 
 @router.post("/timer")
 def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_queue: JobQueue = Depends(get_redis_queue)):
     '''
-    Endpoint to create and schedule a timer.
-    Parameters:
-        - "hours" (int): no. of hours to wait before triggering the webhook
-        - "minutes" (int): no. of minutes to wait before triggering the webhook
-        - "seconds" (int): no. of seconds to wait before triggering the webhook
-        - "webhook_url" (url): the url the webhook should be sent to
+    Endpoint to create and schedule a timer. 
+    Expects a request with TimerRequest schema.
+    Saves the timer to the DB and schedules a webhook in the task queue. 
     '''
     try:
         time_delta= datetime.timedelta(
@@ -32,9 +28,7 @@ def create_timer(request: TimerRequest, db: Database = Depends(get_db), redis_qu
         raise HTTPException(status_code=422, detail="Invalid time duration, try a shorter duration")
     
     # add timer to task queue
-    timer_service = TimerSerivce(redis_queue)
-    timer_service.schedule_timer(timer)
-
+    redis_queue.schedule_job_for_timer(timer)
     db.save_timer(timer)
 
     return {

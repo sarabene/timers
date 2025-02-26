@@ -3,6 +3,9 @@ import datetime
 from pydantic import BaseModel, Field, HttpUrl
 
 class Timer(BaseModel):
+    '''
+    Pydantic model representation of timers.
+    '''
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     webhook_url: HttpUrl
     timestamp: datetime.datetime

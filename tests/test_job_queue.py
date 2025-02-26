@@ -2,9 +2,9 @@ import httpx
 import datetime
 from fakeredis import FakeStrictRedis
 from unittest.mock import patch, MagicMock
-from app.queue import RedisQueue
-from app.jobs import TimerSerivce, trigger_webhook
+from app.job_queue import RedisQueue, trigger_webhook
 from app.models import Timer
+
 
 timer = Timer(
     webhook_url="https://example.com/",
@@ -14,8 +14,7 @@ timer = Timer(
 def test_schedules_timer():
     fake_redis_queue = RedisQueue(redis_connection=FakeStrictRedis())
 
-    timer_service_with_fake_redis = TimerSerivce(redis_queue=fake_redis_queue)
-    job = timer_service_with_fake_redis.schedule_timer(timer)
+    job = fake_redis_queue.schedule_job_for_timer(timer)
     
     assert job.get_status().name == "SCHEDULED"
     assert job.func_name is not None
